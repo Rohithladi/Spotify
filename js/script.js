@@ -206,7 +206,7 @@ async function displayalbums() {
                         <polygon points="11,9 18,14 11,19" fill="none" stroke="black" stroke-width="1.5" stroke-linejoin="round" />
                     </svg>
                 </div>
-                <img src="/songs/${folder}/cover.jpg" alt="image">
+                <img src="/songs/${folder}/cover.png" alt="image">
                 <h2>${response.title}</h2>
                 <p>${response.description}</p>
             </div>`;
