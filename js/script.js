@@ -12,7 +12,7 @@ let bassBoost;
 
 async function getsongs(folder) {
     currfolder = folder;
-    let a = await fetch(`http://127.0.0.1:5500/${folder}/`);
+    let a = await fetch(`/${folder}/`)
     let response = await a.text();
     let div = document.createElement("div");
     div.innerHTML = response;
@@ -30,14 +30,14 @@ async function getsongs(folder) {
     songul.innerHTML = "";
     for (const song of songs) {
         songul.innerHTML += `<li>
-            <img class="invert" src="img/music.svg" alt="">
+            <img class="invert" src="/img/music.svg" alt="">
             <div class="info">
                 <div class="songname">${song.replaceAll("%20", " ")}</div>
                 <div class="songartist">Artist:Rohit</div>
             </div>
             <div class="playnow">
                 <span>Play Now</span>
-                <img class="invert" src="img/play.svg" alt=""> 
+                <img class="invert" src="/img/play.svg" alt=""> 
             </div>
         </li>`;
     }
@@ -79,7 +79,7 @@ searchBar.addEventListener('keyup', () => {
             </div>
             <div class="playnow">
                 <span>Play Now</span>
-                <img class="invert" src="img/play.svg" alt=""> 
+                <img class="invert" src="/img/play.svg" alt=""> 
             </div>
         `;
 
@@ -115,7 +115,8 @@ function secondsToMinutesSeconds(seconds) {
 
 const playMusic = (track, pause = false) => {
 
-    if (!audioContext) {
+   if (!audioContext) 
+    {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
@@ -136,14 +137,16 @@ const playMusic = (track, pause = false) => {
         analyser.connect(audioContext.destination);
     }
 
+    // Resume audio context if it is suspended
     if (audioContext.state === 'suspended') {
-        audioContext.resume(); // Resume audio context if suspended
+        audioContext.resume();
     }
+
 
     current.src = `/${currfolder}/` + track;
     if (!pause) {
         current.play();
-        play.src = "img/pause.svg";
+        play.src = "/img/pause.svg";
     }
 
     document.querySelector(".songinfo").innerHTML = decodeURI(track);
@@ -184,7 +187,7 @@ function drawEqualizer() {
 }
 
 async function displayalbums() {
-    let a = await fetch(`http://127.0.0.1:5500/songs/`);
+    let a = await fetch(`/songs/`);
     let response = await a.text();
     let div = document.createElement("div");
     div.innerHTML = response;
@@ -196,7 +199,7 @@ async function displayalbums() {
         const e = array[index];
         if (e.href.includes("/songs/")) {
             let folder = e.href.split("/").slice(-2)[1];
-            let a = await fetch(`http://127.0.0.1:5500/songs/${folder}/info.json`);
+            let a = await fetch(`/songs/${folder}/info.json`);
             let response = await a.json();
 
             cardContainer.innerHTML += `<div class="card" id="card"data-folder="${folder}">
@@ -239,11 +242,11 @@ async function main() {
     play.addEventListener("click", () => {
         if (current.paused) {
             current.play();
-            play.src = "img/pause.svg"
+            play.src = "/img/pause.svg"
         }
         else {
             current.pause()
-            play.src = "img/play.svg"
+            play.src = "/img/play.svg"
         }
     })
     //Listen for time update
@@ -366,13 +369,13 @@ async function main() {
         if (current.muted == false) {
             current.muted = true
             document.querySelector(".range").getElementsByTagName("input")[0].value = 0
-            volu.src = "img/mute.svg"
+            volu.src = "/img/mute.svg"
 
         }
         else {
             current.muted = false
             document.querySelector(".range").getElementsByTagName("input")[0].value = 50
-            volu.src = "img/volume.svg"
+            volu.src = "/img/volume.svg"
         }
     })
 
