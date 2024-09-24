@@ -33,7 +33,7 @@ async function getsongs(folder) {
             <img class="invert" src="/img/music.svg" alt="">
             <div class="info">
                 <div class="songname">${song.replaceAll("%20", " ")}</div>
-                <div class="songartist">Artist:Rohit</div>
+                <div class="songartist">Artist: Rohit</div>
             </div>
             <div class="playnow">
                 <span>Play Now</span>
@@ -51,7 +51,6 @@ async function getsongs(folder) {
 
     return songs;
 }
-
 
 // Select the search bar and song list
 const searchBar = document.getElementById('search-bar');
@@ -97,7 +96,6 @@ searchBar.addEventListener('keyup', () => {
     }
 });
 
-
 function secondsToMinutesSeconds(seconds) {
     if (isNaN(seconds) || seconds < 0) {
         return "00:00";
@@ -112,36 +110,44 @@ function secondsToMinutesSeconds(seconds) {
     return `${formattedMinutes}:${formattedSeconds}`;
 }
 
-
 const playMusic = (track, pause = false) => {
+    // Ensure AudioContext is created only after user gesture
+    const initializeAudioContext = () => {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            frequencyData = new Uint8Array(analyser.frequencyBinCount);
+            source = audioContext.createMediaElementSource(current);
 
-   if (!audioContext) 
-    {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        frequencyData = new Uint8Array(analyser.frequencyBinCount);
-        source = audioContext.createMediaElementSource(current);
+            // Create effect nodes
+            convolver = audioContext.createConvolver();
+            delay = audioContext.createDelay();
+            delay.delayTime.value = 0.5;
+            bassBoost = audioContext.createBiquadFilter();
+            bassBoost.type = 'lowshelf';
+            bassBoost.frequency.value = 150;
+            bassBoost.gain.value = 10;
 
-        // Create effect nodes
-        convolver = audioContext.createConvolver();
-        delay = audioContext.createDelay();
-        delay.delayTime.value = 0.5;
-        bassBoost = audioContext.createBiquadFilter();
-        bassBoost.type = 'lowshelf';
-        bassBoost.frequency.value = 150;
-        bassBoost.gain.value = 10;
+            // Connect default effect chain
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+        }
+    };
 
-        // Connect default effect chain
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
+    // Check if the audio context is suspended and resume it
+    const resumeAudioContext = () => {
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    };
+
+    // Ensure the first gesture initializes the AudioContext
+    if (audioContext && audioContext.state === 'suspended') {
+        resumeAudioContext();
+    } else {
+        document.addEventListener('click', initializeAudioContext, { once: true });
     }
-
-    // Resume audio context if it is suspended
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-
 
     current.src = `/${currfolder}/` + track;
     if (!pause) {
@@ -154,9 +160,9 @@ const playMusic = (track, pause = false) => {
 
     // Draw the equalizer
     drawEqualizer();
-
 };
-function drawEqualizer() {
+
+const drawEqualizer = () => {
     if (analyser) {
         analyser.getByteFrequencyData(frequencyData);
         const canvas = document.getElementById('equalizer');
@@ -184,7 +190,8 @@ function drawEqualizer() {
 
         requestAnimationFrame(drawEqualizer);
     }
-}
+};
+
 
 async function displayalbums() {
     let a = await fetch(`/songs/`);
@@ -199,7 +206,7 @@ async function displayalbums() {
         const e = array[index];
         if (e.href.includes("/songs/")) {
             let folder = e.href.split("/").slice(-2)[1];
-            let a = await fetch(`/songs/${folder}/info.json`);
+            let a = await fetch(`songs/${folder}/info.json`);
             let response = await a.json();
 
             cardContainer.innerHTML += `<div class="card" id="card"data-folder="${folder}">
@@ -236,7 +243,7 @@ async function main() {
 
 
     //Display all the albums in the page
-    displayalbums();
+    await displayalbums();
 
     //Attach an event listener to play and pre and next
     play.addEventListener("click", () => {
