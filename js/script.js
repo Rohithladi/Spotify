@@ -59,7 +59,7 @@ const songList = document.querySelector('.songlist ul');
 // Function to filter songs based on search input
 searchBar.addEventListener('keyup', () => {
     const searchTerm = searchBar.value.toLowerCase();
-    
+
     // Clear the current song list
     songList.innerHTML = '';
 
@@ -69,7 +69,7 @@ searchBar.addEventListener('keyup', () => {
     // Update the song list with the filtered results
     filteredSongs.forEach(song => {
         const listItem = document.createElement('li');
-        
+
         listItem.innerHTML = `
             <img class="invert" src="img/music.svg" alt="">
             <div class="info">
@@ -194,7 +194,10 @@ const drawEqualizer = () => {
 
 
 async function displayalbums() {
+    console.log("fetching songs")
     let a = await fetch(`/songs/`);
+    console.log("fetching songs completed")
+
     let response = await a.text();
     let div = document.createElement("div");
     div.innerHTML = response;
@@ -205,11 +208,12 @@ async function displayalbums() {
     for (let index = 0; index < array.length; index++) {
         const e = array[index];
         if (e.href.includes("/songs/")) {
-            let folder = e.href.split("/").slice(-2)[1];
+            let folder = e.href.split("/").slice(-2)[1].replace(/^\/|\/$/g, '');  // Fix: remove extra slashes
+            console.log("Fetching info.json for folder:", folder);  // Debugging
             let a = await fetch(`songs/${folder}/info.json`);
             let response = await a.json();
 
-            cardContainer.innerHTML += `<div class="card" id="card"data-folder="${folder}">
+            cardContainer.innerHTML += `<div class="card" id="card" data-folder="${folder}">
                 <div class="play">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="35" height="35">
                         <circle cx="14" cy="14" r="12" fill="#1fdf64" stroke="black" stroke-width="1.5" />
@@ -232,10 +236,6 @@ async function displayalbums() {
 }
 
 async function main() {
-
-
-
-
     //List of all the songs
     await getsongs("songs/ncs")
     playMusic(songs[0], true)
@@ -387,14 +387,14 @@ async function main() {
     })
 
     document.querySelector("#echo").addEventListener("click", () => {
-      
-         
-            delay = audioContext.createDelay();
-            delay.delayTime.value = 0.1;
-            source.connect(delay);
-            delay.connect(analyser);
-            analyser.connect(audioContext.destination);
-        
+
+
+        delay = audioContext.createDelay();
+        delay.delayTime.value = 0.1;
+        source.connect(delay);
+        delay.connect(analyser);
+        analyser.connect(audioContext.destination);
+
     });
 
     document.querySelector("#bass-boost").addEventListener("click", () => {
@@ -479,21 +479,21 @@ async function main() {
     // Select all the cards
     const cards = document.querySelectorAll('.cardcontainer');
 
-// Select the playbar
-const playbar = document.querySelector('.playbar');
+    // Select the playbar
+    const playbar = document.querySelector('.playbar');
 
-// Add click event listener to each card
-cards.forEach(card => {
-    card.addEventListener('click', () => {
-        // Show the playbar when the card is clicked
-        playbar.style.display = 'block';
+    // Add click event listener to each card
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Show the playbar when the card is clicked
+            playbar.style.display = 'block';
 
-        
 
+
+        });
     });
-});
 
-    
+
     const cards1 = document.querySelectorAll('.cardcontainer');
 
     // Function to handle the click event for changing max-height
@@ -507,25 +507,13 @@ cards.forEach(card => {
             });
         }
     };
-    
+
     // Call the function initially to set up the event listeners
     handleCardClick();
-    
+
     // Optional: Add a resize event listener to adjust behavior dynamically when the window is resized
     window.addEventListener('resize', handleCardClick);
-    
 
-      
-
-
-
-
-
-
-    
-
-    
-     
 
 }
 
